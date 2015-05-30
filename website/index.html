@@ -10,11 +10,13 @@
 
 <!-- Bootstrap core CSS -->
 <link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/bootstrap-dialog.min.css" rel="stylesheet">
 
 <!-- Custom styles for this template -->
 <link href="css/jumbotron-narrow.css" rel="stylesheet">
 <script src="js/jquery.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="js/bootstrap-dialog.min.js"></script>
 </head>
 
 <body>
@@ -24,8 +26,10 @@
 		<div class="header clearfix">
         <nav>
           <ul class="nav nav-pills pull-right">
-            <li role="presentation" class="active"><a href="#" id="foodInput">菜单录入</a></li>
-            <li role="presentation"><a href="#">点餐历史</a></li>
+          	<li role="presentation"><a href="#" id="list">当日统计</a></li>
+            <li role="presentation"><a href="#" id="foodInput">菜单录入</a></li>
+            <li role="presentation"><a href="#" id="ordering">今日菜单</a></li>
+            <li role="presentation"><a href="#" id="orderingHistory">点餐历史</a></li>
             <li role="presentation"><a href="#">反馈</a></li>
           </ul>
         </nav>
@@ -33,45 +37,14 @@
       	</div>
 		<div class="page-header">
 			<h1>今日菜单</h1>
-		</div>
-		
-		<div class="row" id="foodItems">
-		<!--
-		  <div class="col-xs-6 col-md-4">
-		  	<div class="thumbnail">
-		      <div class="caption">
-		        <h3>清烧丸子</h3>
-		        <p>13元</p>
-		        <p><a href="#" class="btn btn-primary" role="button">订</a> <a href="#" class="btn btn-default" role="button">退</a></p>
-		      </div>
-		    </div>
-		  </div>
-		-->  
-		</div>
-		
-	</div>
-
-	<!-- 订单确认 -->
-	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	  <div class="modal-dialog">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	        <h4 class="modal-title" id="myModalLabel">订单确认</h4>
-	      </div>
-	      <div class="modal-body">
-	      	<p id="orderConfirm"></p>
-	        <div class="input-group">
+			<div class="input-group">
 			  <input id="account" type="text" class="form-control" placeholder="请输入你的数天邮箱账号" aria-describedby="basic-addon2">
 			  <span class="input-group-addon" id="basic-addon2">@digisky.com</span>
 			</div>
-	      </div>
-	      <div class="modal-footer">
-	        <button id="btnClose" type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-	        <button id="btnOK" type="button" class="btn btn-primary">确定</button>
-	      </div>
-	    </div>
-	  </div>
+		</div>
+		
+		<div class="row" id="foodItems"></div>
+		
 	</div>
 
 	<!-- 菜单录入 -->

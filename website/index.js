@@ -1,4 +1,4 @@
-var remote = 'http://127.0.0.1:9527';
+var remote = 'http://192.168.2.134:9527';
 $(document).ready(function() {
 	var currentDate = new Date();
 	var foods = [];
@@ -24,32 +24,13 @@ $(document).ready(function() {
 		$('a[value2]').on('click', cancel);
 	});
 	
-	$('#myModal').on('hidden.bs.modal', function (e) {
-		$(this).find(':text').val('');
-		$(this).find('#orderConfirm').text('');
-		console.log('hidden.bs.modal');
-	});
-	
-	$('#myModal').find('#btnOK').on('click', function() {
-		var _id = $('#myModal').find('#orderConfirm').attr('value');
-		var _email = $('#myModal').find('#account').val();
-		console.log('确定', _email, _id);
-		if(_email.length == 0) {
-			alert('请输入你的数天邮箱账号');
-			return;
-		}
-		console.log('订单确定按钮事件:', _id);
-		requestServer('GET', remote+'/ordering', {id: _id, email: _email}, function(json) {
-			if(json.success) {
-				alert('下单成功');
-				$('#myModal').hidden();
-			} else {
-				alert('下单失败');
-			}
-		});
-	});
-	
+	//订单录入
 	$('#foodInput').on('click', function() {
+		var _email = $('#account').val();
+    	if($.trim(_email.toLowerCase()) !== 'hushaojun') {
+            BootstrapDialog.alert('无操作权限');
+            return false;
+        }
 		$('#foodList').modal('toggle');
 	});
 	
@@ -58,7 +39,7 @@ $(document).ready(function() {
 	    var data = {menuContent : content};
 	    
 	    requestServer('GET', remote+'/upload', data, function(json) {
-	    	alert('上传成功');
+	    	BootstrapDialog.alert('上传成功');
 	    });
     });
 
@@ -76,7 +57,11 @@ $(document).ready(function() {
 	}
 
     function ordering() {
-		console.log('订-按钮事件');
+    	var _email = $('#account').val();
+    	if($.trim(_email.toLowerCase()).length == 0) {
+            alert('账号没有填哦，亲');
+            return false;
+        }
 		var id = $(this).attr('value1');
 		var orderInfo = null;
 		for(var index = 0; index < foods.length; index++) {
@@ -86,13 +71,107 @@ $(document).ready(function() {
 			}
 		}
 		console.log(orderInfo);
-		$('#myModal').find('#orderConfirm').text(orderInfo.name+' '+orderInfo.price);
-		$('#myModal').find('#orderConfirm').attr('value', orderInfo.id);
-		$('#myModal').modal('toggle');
+		var html = '<div class="input-group"><input id="account" type="text" class="form-control" placeholder="请输入你的数天邮箱账号" aria-describedby="basic-addon2"><span class="input-group-addon" id="basic-addon2">@digisky.com</span></div>';
+		html = '<p class="lead">'+orderInfo.name+' '+orderInfo.price+'元 1份</p>';
+		BootstrapDialog.show({
+			title: '订单确认',
+			message: html,
+			closable: false,
+			size: BootstrapDialog.SIZE_SMALL,
+            buttons: [{
+            	label: '取消',
+            	action: function(dialogRef) {
+            		dialogRef.close();
+            	}
+            }, {
+                label: '确定',
+                action: function(dialogRef) {
+                	var _email = $('#account').val();
+                	if($.trim(_email.toLowerCase()).length == 0) {
+	                    alert('账号没有填哦，亲');
+	                    return false;
+	                }
+                    requestServer('GET', remote+'/ordering', {id: orderInfo.id, email: _email}, function(json) {
+                    	var msg = '下单失败';
+						if(json.success) {
+							msg = '下单成功';
+						}
+						BootstrapDialog.alert({
+							closable: false,
+							title: '消息',
+							message: msg,
+							buttonLabel: '关闭'
+						});
+					});
+					dialogRef.close();
+                }
+            }]
+		});
 	}
 
 	function cancel() {
-		console.log('退-按钮事件', $('#myModal'));
+		var id = $(this).attr('value2');
+		var orderInfo = null;
+		for(var index = 0; index < foods.length; index++) {
+			if(foods[index].id == id) {
+				orderInfo = foods[index];
+				break;
+			}
+		}
+		console.log('取消订单', orderInfo);
+		BootstrapDialog.confirm('你确定要取消吗？', function(result){
+            if(result) {
+                //requestServer('GET', remote+'/cancel', {}, )
+
+            }else {
+                
+            }
+        });
 	}
+
+	//点餐历史
+	$('#orderingHistory').on('click', function() {
+
+	});
+
+	//当日统计
+	$('#list').on('click', function() {
+
+		requestServer('GET', remote+'/currentList', {}, function(json) {
+			var totalPrice = 0;
+			for (var i = json.length - 1; i >= 0; i--) {
+				var price = json[i].price;
+				totalPrice += parseInt(price);
+			};
+			var _label = '合计'+totalPrice+'元';
+			var dialog = new BootstrapDialog({
+				title: '当日统计',
+				message : function(dialogRef) {
+					var $message = $('<div></div>');
+					var $table = $('<table class="table table-striped"></table>');
+					var $thead = $('<thead><tr><th>姓名</th><th>盒饭</th><th>价格</th></tr></thead>');
+					$table.append($thead);
+					var $tbody = $('<tbody></tbody>');
+
+					$.each(json, function(i, item) {
+						$tbody.append($('<tr><td>'+item.user+'</td><td>'+item.foodName+'</td><td>'+item.price+'</td></tr>'));
+					});
+					$table.append($tbody);
+					$message.append($table);
+					console.log($message);
+					return $message;
+				},
+				buttons: [{
+					label: _label,
+					cssClass: 'btn-primary',
+					action: function(dialogRef) {
+						dialogRef.close();
+					}
+				}]
+			});
+			dialog.open();
+
+		});
+	});	
 });
 
