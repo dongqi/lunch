@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -77,6 +78,20 @@ public class HelloController {
             }
         }
 
+        response(req, res, result);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/ordering")
+    public void ordering(@RequestParam(value = "email") String user, @RequestParam(value = "id") String menuKey, HttpServletRequest req, HttpServletResponse res) {
+        log.info("ordering");
+        String account = "account";
+        String ordering = "ordering";
+        String orderingHistory = "ordering:"+sdf.format(Calendar.getInstance().getTime());
+        redisTemplate.boundValueOps(account).append(user);
+        redisTemplate.boundHashOps(ordering).put(user, menuKey);
+        redisTemplate.boundHashOps(orderingHistory).put(user, menuKey);
+        Map<String, Object> result = Maps.newHashMap();
+        result.put("success", Boolean.TRUE);
         response(req, res, result);
     }
 
