@@ -68,6 +68,7 @@ public class HelloController {
 
             int index = 0;
             for (String rowdata : menuContent.split(";")) {
+                if(StringUtils.isEmpty(rowdata)) continue;
                 Map<String, String> data = Maps.newHashMap();
                 String[] values = rowdata.split(",");
                 String id = String.valueOf(index);

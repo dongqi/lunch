@@ -6,17 +6,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
-<title>点餐</title>
+<title>历史</title>
 
 <!-- Bootstrap core CSS -->
 <link href="css/bootstrap.min.css" rel="stylesheet">
 <link href="css/bootstrap-dialog.min.css" rel="stylesheet">
+<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 
 <!-- Custom styles for this template -->
 <link href="css/jumbotron-narrow.css" rel="stylesheet">
 <script src="js/jquery.min.js"></script>
+<script src="js/moment-with-locales.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script src="js/bootstrap-dialog.min.js"></script>
+<script src="js/bootstrap-datetimepicker.min.js"></script>
 </head>
 
 <body>
@@ -29,26 +32,39 @@
           	<li role="presentation"><a href="#" id="list">当日统计</a></li>
             <li role="presentation"><a href="#" id="foodInput">菜单录入</a></li>
             <li role="presentation"><a href="index.html" id="ordering">今日菜单</a></li>
-            <li role="presentation"><a href="history.html" target="_block" id="orderingHistory">点餐历史</a></li>
+            <li role="presentation"><a href="history.html" class="active" id="orderingHistory">点餐历史</a></li>
             <li role="presentation"><a href="#">反馈</a></li>
           </ul>
         </nav>
         <h3 class="text-muted">点餐</h3>
       	</div>
 		<div class="page-header">
-			<h1>今日菜单</h1>
+			<h1>历史记录</h1>
 			<div class="input-group">
-			  <input id="account" type="text" class="form-control" placeholder="请输入你的数天邮箱账号" aria-describedby="basic-addon2">
-			  <span class="input-group-addon" id="basic-addon2">@digisky.com</span>
-			</div>
+		      <input type="text" class="form-control" placeholder="查询时间" id="datetimepicker">
+		      <span class="input-group-btn">
+		        <button class="btn btn-default" type="button" id="queryBtn">Go!</button>
+		      </span>
+		    </div>
 		</div>
 		
-		<div class="row" id="foodItems"></div>
+		<div>
+			<table class="table table-striped">
+			  <thead>
+			    <tr>
+			      <td>姓名</td>
+			      <td>盒饭</td>
+			      <td>价格</td>
+			    </tr>
+			  </thead>
+			  <tbody>
+			  </tbody>
+			</table>
+		</div>
 		
 	</div>
 
 	<footer class="footer"><p>&copy; eastseven.cn 2015</p></footer>
-
-	<script src="index.js"></script>
+	<script type="text/javascript" src="history.js"></script>
 </body>
 </html>

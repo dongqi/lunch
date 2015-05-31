@@ -2,46 +2,44 @@ var remote = 'http://192.168.2.134:9527';
 $(document).ready(function() {
 	var currentDate = new Date();
 	var foods = [];
-	requestServer('GET', remote+'/get', {}, function(json) {
-		console.log(json);
-			
-		$.each(json, function(i, item) {
-			var data = '<div class="col-xs-6 col-md-4">';
-		  	data += '<div class="thumbnail">';
-		  	data += '<div class="caption">';
-		  	data += '<h3>'+item.name+'</h3>';
-		  	data += '<p>'+item.price+'元</p>';
-		  	data += '<p><a value1="'+item.id+'" href="#" class="btn btn-primary" role="button" id="ding_'+item.id+'">订</a> <a value2="'+item.id+'" id="tui_'+item.id+'" href="#" class="btn btn-default" role="button">退</a></p>';
-		  	data += '</div>';
-		  	data += '</div>';
-		  	data += '</div>';
-		  	$('#foodItems').after(data);
-		});
-		foods = json;
-		//订
-		$('a[value1]').on('click', ordering);
-		//退
-		$('a[value2]').on('click', cancel);
-	});
+	dataLoading();
 	
-	//订单录入
+	//菜单录入
 	$('#foodInput').on('click', function() {
 		var _email = $('#account').val();
     	if($.trim(_email.toLowerCase()) !== 'hushaojun') {
             BootstrapDialog.alert('无操作权限');
             return false;
         }
-		$('#foodList').modal('toggle');
+		
+        BootstrapDialog.show({
+        	title: '菜单录入',
+        	message: '<div><textarea class="form-control" rows="3"></textarea></div>',
+        	closable: false,
+        	buttons: [{
+        		label: '取消',
+        		action: function(dialogRef) {
+        			dialogRef.close();
+        		}
+        	}, {
+        		label: '上传',
+        		action: function(dialogRef) {
+        			var menuContent = dialogRef.getModalBody().find('textarea').val();
+        			if($.trim(menuContent.toLowerCase()).length == 0) {
+	                    BootstrapDialog.alert('上传菜单不能为空');
+	                    return false;
+	                }
+	                console.log('菜单录入', menuContent);
+	                requestServer('GET', remote+'/upload', {menuContent: menuContent}, function(json) {
+				    	BootstrapDialog.alert('上传成功');
+				    });
+				    location.reload();
+				    dialogRef.close();
+				    //dataLoading(dialogRef);
+        		}
+        	}]
+        });
 	});
-	
-	$('#foodList').find('#btnInput').on('click', function() {
-	    var content = $('#foodList').find('#inputContent').val();
-	    var data = {menuContent : content};
-	    
-	    requestServer('GET', remote+'/upload', data, function(json) {
-	    	BootstrapDialog.alert('上传成功');
-	    });
-    });
 
 	function requestServer(_type, _url, _data, _success) {
 		$.ajax({
@@ -59,7 +57,7 @@ $(document).ready(function() {
     function ordering() {
     	var _email = $('#account').val();
     	if($.trim(_email.toLowerCase()).length == 0) {
-            alert('账号没有填哦，亲');
+            BootstrapDialog.alert('账号没有填哦，亲');
             return false;
         }
 		var id = $(this).attr('value1');
@@ -88,7 +86,7 @@ $(document).ready(function() {
                 action: function(dialogRef) {
                 	var _email = $('#account').val();
                 	if($.trim(_email.toLowerCase()).length == 0) {
-	                    alert('账号没有填哦，亲');
+	                    BootstrapDialog.alert('账号没有填哦，亲');
 	                    return false;
 	                }
                     requestServer('GET', remote+'/ordering', {id: orderInfo.id, email: _email}, function(json) {
@@ -172,6 +170,34 @@ $(document).ready(function() {
 			dialog.open();
 
 		});
-	});	
+	});
+
+	function dataLoading(dialogRef) {
+		
+		requestServer('GET', remote+'/get', {}, function(json) {
+			$('#foodItems').empty();
+			console.log('dataLoading: ', json);
+			$.each(json, function(i, item) {
+				var data = '<div class="col-xs-6 col-md-4">';
+			  	data += '<div class="thumbnail">';
+			  	data += '<div class="caption">';
+			  	data += '<h3>'+item.name+'</h3>';
+			  	data += '<p>'+item.price+'元</p>';
+			  	data += '<p><a value1="'+item.id+'" href="#" class="btn btn-primary" role="button" id="ding_'+item.id+'">订</a> <a value2="'+item.id+'" id="tui_'+item.id+'" href="#" class="btn btn-default" role="button">退</a></p>';
+			  	data += '</div>';
+			  	data += '</div>';
+			  	data += '</div>';
+			  	$('#foodItems').append(data);
+			});
+			foods = json;
+			//订
+			$('a[value1]').on('click', ordering);
+			//退
+			$('a[value2]').on('click', cancel);
+			console.log('dataLoading after: ', $('#foodItems'));
+
+			if(dialogRef) dialogRef.close();
+		});
+	}	
 });
 
