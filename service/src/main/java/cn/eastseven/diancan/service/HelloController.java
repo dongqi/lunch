@@ -7,6 +7,8 @@ import com.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -16,10 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Controller
@@ -32,6 +31,12 @@ public class HelloController {
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+
+    @Autowired
+    private MailSender mailSender;
+
+    @Autowired
+    private SimpleMailMessage templateMessage;
 
     @RequestMapping(method = RequestMethod.GET, value = "/get")
     public void getMenu(HttpServletRequest req, HttpServletResponse res) {
@@ -97,7 +102,30 @@ public class HelloController {
         redisTemplate.boundHashOps(orderingHistory).put(user, menuKey);
         Map<String, Object> result = Maps.newHashMap();
         result.put("success", Boolean.TRUE);
+
+        String name = (String) redisTemplate.boundHashOps(menuKey).get("name");
+        String price = (String) redisTemplate.boundHashOps(menuKey).get("price");
+        String mail = user+"@digisky.com";
+        String text = name+": "+price+"元";
+        sendMail(mail, text);
+
         response(req, res, result);
+    }
+
+    private void sendMail(String mail, String text) {
+        Date date = new Date();
+        // Create a thread safe "copy" of the template message and customize it
+        SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
+
+        msg.setTo(mail);
+        msg.setText(text+"\n"+date);
+        msg.setSentDate(date);
+
+        try {
+            mailSender.send(msg);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/currentList")
