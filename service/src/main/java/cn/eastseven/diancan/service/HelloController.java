@@ -131,12 +131,14 @@ public class HelloController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/currentList")
     public void list(HttpServletRequest req, HttpServletResponse res) {
+        String date = sdf.format(new Date());
         List<Map<String, Object>> result = Lists.newArrayList();
         String ordering = "ordering";
         Set<Object> users = redisTemplate.boundHashOps(ordering).keys();
         for(Object user : users) {
             Map<String, Object> data = Maps.newHashMap();
             String menuKey = (String) redisTemplate.boundHashOps(ordering).get(user);
+            if(!menuKey.contains(date)) continue;
             Object name = redisTemplate.boundHashOps(menuKey).get("name");
             Object price = redisTemplate.boundHashOps(menuKey).get("price");
             data.put("user", user);
