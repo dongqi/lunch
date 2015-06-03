@@ -149,6 +149,18 @@ public class HelloController {
         response(req, res, result);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/cancel")
+    public void cancel(@RequestParam(value = "account", required = true) String account, HttpServletRequest req, HttpServletResponse res) {
+        String date = sdf.format(Calendar.getInstance().getTime());
+        List<Map<String, Object>> result = Lists.newArrayList();
+        String ordering = "ordering";
+        String orderingHistory = "ordering:"+date;
+        redisTemplate.boundHashOps(ordering).delete(account);
+        redisTemplate.boundHashOps(orderingHistory).delete(account);
+
+        response(req, res, result);
+    }
+
     private void response(HttpServletRequest req, HttpServletResponse res, Object result) {
         res.setContentType("text/plain");
         String callbackFunName = req.getParameter("callbackparam");//得到js函数名称

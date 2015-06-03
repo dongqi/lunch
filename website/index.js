@@ -1,5 +1,6 @@
-var remote = 'http://192.168.2.134:9527';
+
 $(document).ready(function() {
+	console.log('hello world');
 	var currentDate = new Date();
 	var foods = [];
 	dataLoading();
@@ -14,7 +15,7 @@ $(document).ready(function() {
 		
         BootstrapDialog.show({
         	title: '菜单录入',
-        	message: '<div><textarea class="form-control" rows="3"></textarea></div>',
+        	message: '<div><textarea class="form-control" rows="15"></textarea></div>',
         	closable: false,
         	buttons: [{
         		label: '取消',
@@ -35,7 +36,6 @@ $(document).ready(function() {
 				    });
 				    location.reload();
 				    dialogRef.close();
-				    //dataLoading(dialogRef);
         		}
         	}]
         });
@@ -55,10 +55,14 @@ $(document).ready(function() {
 	}
 
     function ordering() {
-    	var _email = $('#account').val();
-    	if($.trim(_email.toLowerCase()).length == 0) {
+    	var account = $('#account').val();
+    	if($.trim(account.toLowerCase()).length == 0) {
             BootstrapDialog.alert('账号没有填哦，亲');
             return false;
+        }
+        if(/\w+/g.test(account) == false) {
+        	BootstrapDialog.alert('请输入你的数天邮箱账号，就是你的名字全拼哦');
+        	return false;
         }
 		var id = $(this).attr('value1');
 		var orderInfo = null;
@@ -84,12 +88,7 @@ $(document).ready(function() {
             }, {
                 label: '确定',
                 action: function(dialogRef) {
-                	var _email = $('#account').val();
-                	if($.trim(_email.toLowerCase()).length == 0) {
-	                    BootstrapDialog.alert('账号没有填哦，亲');
-	                    return false;
-	                }
-                    requestServer('GET', remote+'/ordering', {id: orderInfo.id, email: _email}, function(json) {
+                    requestServer('GET', remote+'/ordering', {id: orderInfo.id, email: account}, function(json) {
                     	var msg = '下单失败';
 						if(json.success) {
 							msg = '下单成功';
@@ -108,6 +107,15 @@ $(document).ready(function() {
 	}
 
 	function cancel() {
+		var account = $('#account').val();
+    	if($.trim(account.toLowerCase()).length == 0) {
+            BootstrapDialog.alert('账号没有填哦，亲');
+            return false;
+        }
+        if(/^[a-z]+$/g.test(account) == false) {
+        	BootstrapDialog.alert('请输入你的数天邮箱账号，就是你的名字全拼哦');
+        	return false;
+        }
 		var id = $(this).attr('value2');
 		var orderInfo = null;
 		for(var index = 0; index < foods.length; index++) {
@@ -119,18 +127,20 @@ $(document).ready(function() {
 		console.log('取消订单', orderInfo);
 		BootstrapDialog.confirm('你确定要取消吗？', function(result){
             if(result) {
-                //requestServer('GET', remote+'/cancel', {}, )
+                requestServer('GET', remote+'/cancel', {account: account}, function(json) {
+                	BootstrapDialog.show({
+                		title: '消息',
+                		message: '取消成功',
+                		buttons: [{
+                			label: '关闭',
+                			action: function(dialogRef) {dialogRef.close();}
+                		}]
+                	});
 
-            }else {
-                
+                });
             }
         });
 	}
-
-	//点餐历史
-	$('#orderingHistory').on('click', function() {
-
-	});
 
 	//当日统计
 	$('#list').on('click', function() {
@@ -172,7 +182,7 @@ $(document).ready(function() {
 		});
 	});
 
-	function dataLoading(dialogRef) {
+	function dataLoading() {
 		
 		requestServer('GET', remote+'/get', {}, function(json) {
 			$('#foodItems').empty();
@@ -196,7 +206,6 @@ $(document).ready(function() {
 			$('a[value2]').on('click', cancel);
 			console.log('dataLoading after: ', $('#foodItems'));
 
-			if(dialogRef) dialogRef.close();
 		});
 	}	
 });
