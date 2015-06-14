@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+<title>编辑</title>
+
+<!-- Bootstrap core CSS -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/bootstrap-dialog.min.css" rel="stylesheet">
+<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+
+<!-- Custom styles for this template -->
+<link href="css/jumbotron-narrow.css" rel="stylesheet">
+<script src="js/jquery.min.js"></script>
+<script src="js/moment-with-locales.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/bootstrap-dialog.min.js"></script>
+<script src="js/bootstrap-datetimepicker.min.js"></script>
+</head>
+
+<body>
+
+	<!-- Begin page content -->
+	<div class="container">
+		<div class="btn-group btn-group-justified" role="group" aria-label="...">
+		  
+		  <div class="btn-group" role="group">
+		    <button type="button" class="btn btn-primary" id="uploadBtn">上传</button>
+		  </div>
+		  
+		</div>
+
+		<table class="table table-striped">
+			
+			<thead>
+				<th>ID</th>
+				<th>名称</th>
+				<th>价格</th>
+				<th>时间</th>
+				<th>显示</th>
+				<th>操作</th>
+			</thead>
+			<tbody id="foodItems">
+				
+			</tbody>
+		</table>
+		
+	</div>
+
+	<footer class="footer"><p>&copy; eastseven.cn 2015</p></footer>
+	<script type="text/javascript">
+	$(document).ready(function() {
+		console.log('edit table');
+		$.getJSON('/service/list', function(data) {
+			console.log(data);
+			for (var i =  0; i < data.length; i++) {
+				var foodItem = data[i];
+
+				var date = new Date();
+				date.setTime(foodItem.createTime);
+				var dateStr = date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()+' '+date.getHours()+':'+date.getMinutes()+':'+date.getSeconds();
+				console.log(foodItem.createTime);
+				
+				var tr = '<tr>';
+				tr += '<td>'+foodItem.id+'</td>';
+				tr += '<td>'+foodItem.name+'</td>';
+				tr += '<td>'+foodItem.price+'</td>';
+				tr += '<td>'+dateStr+'</td>';
+				tr += '<td>'+foodItem.valid+'</td>';
+				tr += '<td><button class="btn btn-danger" type="submit" onclick="op('+foodItem.id+','+(!foodItem.valid)+')">设置</button></td>';
+				tr += '</tr>';
+				$('#foodItems').append(tr);
+			};
+			
+		});
+		
+		$('#uploadBtn').on('click', function() {
+			BootstrapDialog.show({
+        	title: '菜单录入',
+        	message: '<div><textarea class="form-control" rows="15"></textarea></div>',
+        	closable: false,
+        	buttons: [{
+        		label: '取消',
+        		action: function(dialogRef) {
+        			dialogRef.close();
+        		}
+        	}, {
+        		label: '上传',
+        		action: function(dialogRef) {
+        			var menuContent = dialogRef.getModalBody().find('textarea').val();
+        			if($.trim(menuContent.toLowerCase()).length == 0) {
+	                    BootstrapDialog.alert('上传菜单不能为空');
+	                    return false;
+	                }
+	                console.log('菜单录入', menuContent);
+	                $.post('/service/upload', {menuContent: menuContent}, function(data) {
+	                	console.log(data);
+	                	BootstrapDialog.alert('上传成功');
+	                }, 'json');
+				    location.reload();
+				    dialogRef.close();
+        		}
+        	}]
+        });
+		});
+	});
+	function op (id, valid) {
+		console.log('操作的ID', id, valid);
+		$.post('/service/setvalid', {id:id, valid:valid}, function(data) {
+			console.log(data);
+			location.reload();
+		}, 'json');
+	}
+	</script>
+</body>
+</html>

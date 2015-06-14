@@ -3,3 +3,7 @@ service/target
 service/*.iml
 
 website/remote.js
+
+config/*.rdb
+config/*.aof
+config/*.log

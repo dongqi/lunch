@@ -1,6 +1,16 @@
 
 $(document).ready(function() {
 	console.log('hello world');
+
+	$.getJSON('/service/login', function(data) {
+		console.log(data);
+		if(data.name.length > 0) {
+			$('#account').val(data.name);
+		} else {
+
+		}
+	});
+
 	var currentDate = new Date();
 	var foods = [];
 	dataLoading();
@@ -8,7 +18,7 @@ $(document).ready(function() {
 	//菜单录入
 	$('#foodInput').on('click', function() {
 		var _email = $('#account').val();
-    	if($.trim(_email.toLowerCase()) !== 'hushaojun') {
+    	if($.trim(_email.toLowerCase()) !== 'hushaojun' && $.trim(_email.toLowerCase()) !== 'admin') {
             BootstrapDialog.alert('无操作权限');
             return false;
         }
@@ -31,9 +41,10 @@ $(document).ready(function() {
 	                    return false;
 	                }
 	                console.log('菜单录入', menuContent);
-	                requestServer('GET', remote+'/upload', {menuContent: menuContent}, function(json) {
-				    	BootstrapDialog.alert('上传成功');
-				    });
+	                $.post('/service/upload', {menuContent: menuContent}, function(data) {
+	                	console.log(data);
+	                	BootstrapDialog.alert('上传成功');
+	                }, 'json');
 				    location.reload();
 				    dialogRef.close();
         		}
@@ -88,18 +99,16 @@ $(document).ready(function() {
             }, {
                 label: '确定',
                 action: function(dialogRef) {
-                    requestServer('GET', remote+'/ordering', {id: orderInfo.id, email: account}, function(json) {
-                    	var msg = '下单失败';
-						if(json.success) {
-							msg = '下单成功';
-						}
+                	$.post('/service/ordering', {id: orderInfo.id, username: account}, function(json) {
+                		var msg = '下单成功';
+						
 						BootstrapDialog.alert({
 							closable: false,
 							title: '消息',
 							message: msg,
 							buttonLabel: '关闭'
 						});
-					});
+                	}, 'json');
 					dialogRef.close();
                 }
             }]
@@ -183,30 +192,33 @@ $(document).ready(function() {
 	});
 
 	function dataLoading() {
-		
-		requestServer('GET', remote+'/get', {}, function(json) {
+		$.getJSON('/service/list', function(json) {
 			$('#foodItems').empty();
 			console.log('dataLoading: ', json);
-			$.each(json, function(i, item) {
-				var data = '<div class="col-xs-6 col-md-4">';
-			  	data += '<div class="thumbnail">';
-			  	data += '<div class="caption">';
-			  	data += '<h3>'+item.name+'</h3>';
-			  	data += '<p>'+item.price+'元</p>';
-			  	data += '<p><a value1="'+item.id+'" href="#" class="btn btn-primary" role="button" id="ding_'+item.id+'">订</a> <a value2="'+item.id+'" id="tui_'+item.id+'" href="#" class="btn btn-default" role="button">退</a></p>';
-			  	data += '</div>';
-			  	data += '</div>';
-			  	data += '</div>';
-			  	$('#foodItems').append(data);
-			});
+			for(var index = 0; index < json.length; index++) {
+				var item = json[index];
+				if(item.valid) {
+					var data = '<div class="col-xs-6 col-md-4">';
+				  	data += '<div class="thumbnail">';
+				  	data += '<div class="caption">';
+				  	data += '<h3>'+item.name+'</h3>';
+				  	data += '<p>'+item.price+'元</p>';
+				  	data += '<p><a value1="'+item.id+'" href="#" class="btn btn-primary" role="button" id="ding_'+item.id+'">订</a> <a value2="'+item.id+'" id="tui_'+item.id+'" href="#" class="btn btn-default" role="button">退</a></p>';
+				  	data += '</div>';
+				  	data += '</div>';
+				  	data += '</div>';
+				  	$('#foodItems').append(data);
+				}
+			}
+			
 			foods = json;
 			//订
 			$('a[value1]').on('click', ordering);
 			//退
 			$('a[value2]').on('click', cancel);
 			console.log('dataLoading after: ', $('#foodItems'));
-
 		});
+
 	}	
 });
 
