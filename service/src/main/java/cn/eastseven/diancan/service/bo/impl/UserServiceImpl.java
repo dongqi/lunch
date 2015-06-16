@@ -9,7 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.logging.Logger;
 
 /**
@@ -25,50 +25,29 @@ public class UserServiceImpl implements UserService {
     @Resource(name = "redisTemplate")
     private HashOperations<String, String, Object> hashOperations;
 
+    @Autowired
+    private BaseDao dao;
+
     @Override
     public User get(String username) {
-        String key = User.class.getSimpleName() + ":" + username;
-        boolean hasKey = redisTemplate.hasKey(key);
-        if(hasKey) {
-            User user = null;
-            try {
-                user = User.class.newInstance();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+        User target = null;
+        Collection<User> users = (Collection<User>) dao.all(User.class);
+        for(User user : users) {
+            if(user.getName().equalsIgnoreCase(username)) {
+                target = user;
+                break;
             }
-            for (Field f : user.getClass().getDeclaredFields()) {
-                f.setAccessible(true);
-                try {
-                    Object value = hashOperations.get(key, f.getName());
-                    f.set(user, value);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-                f.setAccessible(false);
-            }
-            return user;
-        } else {
-            User user = new User(username);
-            return user;
         }
+
+        if(target == null) {
+            return new User("");
+        }
+        return target;
     }
 
     @Override
     public User save(User user) {
-        String key = user.getClass().getSimpleName() + ":" + user.getName();
-        for (Field f : user.getClass().getDeclaredFields()) {
-            f.setAccessible(true);
-            String hfield = f.getName();
-            try {
-                Object hvalue = f.get(user);
-                hashOperations.put(key, hfield, hvalue);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-            f.setAccessible(false);
-        }
+        long id = dao.create(user);
         return user;
     }
 
@@ -81,7 +60,7 @@ public class UserServiceImpl implements UserService {
     public String getName(String host) {
         String name = "";
         Object value = redisTemplate.boundValueOps(host).get();
-        if(value != null) {
+        if (value != null) {
             name = value.toString();
         }
         return name;

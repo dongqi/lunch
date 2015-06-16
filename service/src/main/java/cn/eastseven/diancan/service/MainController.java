@@ -39,14 +39,25 @@ public class MainController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/login")
     public User login(@RequestParam(required = false, value = "account", defaultValue = "") String name, HttpServletRequest req, HttpServletResponse res) {
-        log.info("remote host: " + req.getRemoteHost() + ", name=" + name);
-        String host = req.getRemoteHost();
+        log.info("header:"+req.getHeader("host")+", "+req.getHeader("x-real-ip"));
+
+        String host = req.getHeader("x-real-ip");
         if(StringUtils.isEmpty(name)) {
             name = userService.getName(host);
         }
         User user = userService.get(name);
-
+        log.info(user.toString());
         return user;
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/signin")
+    public void signin(@RequestParam(value = "account") String username, HttpServletRequest req) {
+        User user = new User(username);
+        String host = req.getHeader("x-real-ip");
+        user.getIps().add(host);
+        userService.save(user);
+        userService.saveHost(host, username);
+        log.info(host+": "+username);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/upload")

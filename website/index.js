@@ -1,6 +1,6 @@
 
 $(document).ready(function() {
-	/*
+	/**/
 	$.getJSON('/service/login', function(data) {
 		console.log(data);
 		if(data.name.length > 0) {
@@ -20,6 +20,7 @@ $(document).ready(function() {
 	        				BootstrapDialog.alert('请输入你的数天邮箱账号，就是你的名字全拼哦');
 	        			} else {
 	        				$('#account').val(account);
+	        				$.post('/service/signin', {account: account}, function(data) {}, 'json');
 	        				dialogRef.close();
 	        			}
 	        		}
@@ -27,7 +28,7 @@ $(document).ready(function() {
 			});
 		}
 	});
-	*/
+
 
 	var currentDate = new Date();
 	var foods = [];

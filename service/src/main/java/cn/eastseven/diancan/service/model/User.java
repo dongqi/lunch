@@ -15,6 +15,8 @@ public class User implements Serializable {
 
     private Set<String> ips = Sets.newHashSet();
 
+    public User() {}
+
     public User(String name) {
         this.name = name;
     }
