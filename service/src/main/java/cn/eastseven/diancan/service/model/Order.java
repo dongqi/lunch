@@ -1,11 +1,13 @@
 package cn.eastseven.diancan.service.model;
 
+import java.io.Serializable;
 import java.util.Calendar;
 
 /**
  * Created by dongqi on 15/6/7.
  */
-public class Order {
+public class Order implements Serializable, Comparable<Order> {
+
     private long id;
     private User user;
     private FoodItem foodItem;
@@ -61,5 +63,10 @@ public class Order {
                 ", datetime=" + datetime +
                 ", pay=" + pay +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Order o) {
+        return (int) (id - o.getId());
     }
 }

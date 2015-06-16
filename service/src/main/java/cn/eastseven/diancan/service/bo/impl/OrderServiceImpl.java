@@ -2,6 +2,7 @@ package cn.eastseven.diancan.service.bo.impl;
 
 import cn.eastseven.diancan.service.bo.CommonService;
 import cn.eastseven.diancan.service.bo.OrderService;
+import cn.eastseven.diancan.service.dao.BaseDao;
 import cn.eastseven.diancan.service.model.FoodItem;
 import cn.eastseven.diancan.service.model.Order;
 import cn.eastseven.diancan.service.model.User;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -33,34 +35,16 @@ public class OrderServiceImpl implements OrderService {
     private HashOperations<String, String, Object> hashOperations;
 
     @Autowired
-    private CommonService commonService;
+    private BaseDao dao;
 
     @Override
     public Order save(Order order) {
         if (order.getId() != 0) {
             //update
+            return (Order) dao.update(order);
         } else {
             //add
-            order.setId(commonService.getSequenceNextValue(Order.class));
-            String key = order.getClass().getSimpleName() + ":" + order.getId();
-            for (Field f : order.getClass().getDeclaredFields()) {
-                f.setAccessible(true);
-                String hfield = f.getName();
-                try {
-                    Object hvalue = f.get(order);
-                    if (hfield.equals("user")) {
-                        User user = (User) hvalue;
-                        hvalue = user.getName();
-                    } else if (hfield.equals("foodItem")) {
-                        FoodItem foodItem = (FoodItem) hvalue;
-                        hvalue = foodItem.getId();
-                    }
-                    hashOperations.put(key, hfield, hvalue);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-                f.setAccessible(false);
-            }
+            dao.create(order);
         }
         return order;
     }
@@ -69,20 +53,21 @@ public class OrderServiceImpl implements OrderService {
     public List<Order> getOrders() {
         List<Order> orders = Lists.newArrayList();
 
-        List<String> orderKeys = Lists.newArrayList();
-        Set<String> keys = redisTemplate.keys(Order.class.getSimpleName() + "*");
-        for(String key : keys) {
-            orderKeys.add(key);
-        }
-        Collections.sort(orderKeys);
-
-        for(String orderKey : orderKeys) {
-            Set<String> hfields = hashOperations.keys(orderKey);
-            for (String hfield: hfields) {
-
-            }
-        }
+        Collection<Order> all = (Collection<Order>) dao.all(Order.class);
+        orders.addAll(all);
+        Collections.sort(orders);
 
         return orders;
+    }
+
+    @Override
+    public Order get(long id) {
+        return (Order) dao.retrieve(id, Order.class);
+    }
+
+    @Override
+    public int delete(long id) {
+        dao.delete(id, Order.class);
+        return 0;
     }
 }

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+<title>订单统计</title>
+
+<!-- Bootstrap core CSS -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/bootstrap-dialog.min.css" rel="stylesheet">
+<link href="css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+
+<!-- Custom styles for this template -->
+<link href="css/jumbotron-narrow.css" rel="stylesheet">
+<script src="js/jquery.min.js"></script>
+<script src="js/moment-with-locales.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/bootstrap-dialog.min.js"></script>
+<script src="js/bootstrap-datetimepicker.min.js"></script>
+</head>
+
+<body>
+
+	<!-- Begin page content -->
+	<div class="container">
+
+		<table class="table table-striped">
+			
+			<thead>
+				<th>序号</th>
+				<th>姓名</th>
+				<th>盒饭</th>
+				<th>价格</th>
+				<th>时间</th>
+				<th>付款</th>
+				<th>操作</th>
+			</thead>
+			<tbody id="orders">
+				
+			</tbody>
+		</table>
+		
+	</div>
+
+	<footer class="footer"><p>&copy; eastseven.cn 2015</p></footer>
+	<script type="text/javascript">
+	$(document).ready(function() {
+		console.log('order table');
+
+		$.getJSON('/service/currentOrders', function(data) {
+			console.log(data);
+			for (var i =  0; i < data.length; i++) {
+				var order = data[i];
+
+				var date = new Date();
+				date.setTime(order.datetime);
+				var dateStr = date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()+' '+date.getHours()+':'+date.getMinutes()+':'+date.getSeconds();
+				
+				var tr = '<tr>';
+				tr += '<td>'+(i+1)+'</td>';
+				tr += '<td>'+order.user.name+'</td>';
+				tr += '<td>'+order.foodItem.name+'</td>';
+				tr += '<td>'+order.foodItem.price+'</td>';
+				tr += '<td>'+dateStr+'</td>';
+				tr += '<td>'+order.pay+'</td>';
+				tr += '<td><button class="btn btn-danger" type="submit" onclick="del('+order.id+')">删除</button>';
+				tr += '<button type="button" class="btn btn-primary" onclick="pay('+order.id+','+(!order.pay)+')">付款</button>';
+				tr += '</td>';
+				tr += '</tr>';
+
+				$('#orders').append(tr);
+			};
+			
+		});
+	});
+	function del (id) {
+		console.log('删除操作的ID', id);
+		$.post('/service/del', {id:id}, function(data) {
+			console.log(data);
+			location.reload();
+		}, 'json');
+	}
+	function pay (id, pay) {
+		console.log('付款操作的ID', id, pay);
+		$.post('/service/pay', {id:id, pay:pay}, function(data) {
+			console.log(data);
+			location.reload();
+		}, 'json');
+	}
+	</script>
+</body>
+</html>

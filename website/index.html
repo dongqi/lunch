@@ -17,7 +17,8 @@
 <script src="js/jquery.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script src="js/bootstrap-dialog.min.js"></script>
-<script type="text/javascript" src="remote.js"></script>
+<script type="text/javascript" src="http://fw.qq.com/ipaddress"></script>
+
 </head>
 
 <body>
@@ -28,10 +29,7 @@
         <nav>
           <ul class="nav nav-pills pull-right">
           	<li role="presentation"><a href="#" id="list">当日统计</a></li>
-            <li role="presentation"><a href="#" id="foodInput">菜单录入</a></li>
             <li role="presentation"><a href="index.html" id="ordering">今日菜单</a></li>
-            <li role="presentation"><a href="history.html" target="_block" id="orderingHistory">点餐历史</a></li>
-            <li role="presentation"><a href="#">反馈</a></li>
           </ul>
         </nav>
         <h3 class="text-muted">点餐</h3>
@@ -40,7 +38,7 @@
 			<h1>只支持非IE内核浏览器</h1>
 			<h1>今日菜单</h1>
 			<div class="input-group">
-			  <input id="account" type="text" class="form-control" placeholder="请输入你的数天邮箱账号" aria-describedby="basic-addon2">
+			  <input tabindex="1" id="account" type="text" class="form-control" placeholder="请输入你的数天邮箱账号" aria-describedby="basic-addon2">
 			  <span class="input-group-addon" id="basic-addon2">@digisky.com</span>
 			</div>
 		</div>

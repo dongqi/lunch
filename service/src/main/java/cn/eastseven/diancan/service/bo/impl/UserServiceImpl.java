@@ -1,6 +1,7 @@
 package cn.eastseven.diancan.service.bo.impl;
 
 import cn.eastseven.diancan.service.bo.UserService;
+import cn.eastseven.diancan.service.dao.BaseDao;
 import cn.eastseven.diancan.service.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;

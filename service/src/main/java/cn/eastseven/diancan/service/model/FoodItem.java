@@ -1,15 +1,18 @@
 package cn.eastseven.diancan.service.model;
 
+import java.io.Serializable;
+import java.util.Calendar;
+
 /**
  * Created by dongqi on 15/6/7.
  */
-public class FoodItem {
+public class FoodItem implements Serializable, Comparable<FoodItem> {
 
     private long id;
     private String name;
-    private double price;
-    private long createTime;
-    private boolean valid;
+    private double price = 0.0D;
+    private long createTime = Calendar.getInstance().getTimeInMillis();
+    private boolean valid = Boolean.TRUE;
 
     public long getId() {
         return id;
@@ -60,5 +63,10 @@ public class FoodItem {
                 ", createTime=" + createTime +
                 ", valid=" + valid +
                 '}';
+    }
+
+    @Override
+    public int compareTo(FoodItem o) {
+        return (int) (id - o.getId());
     }
 }

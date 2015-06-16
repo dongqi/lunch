@@ -26,12 +26,14 @@
 
 	<!-- Begin page content -->
 	<div class="container">
+		
 		<div class="btn-group btn-group-justified" role="group" aria-label="...">
-		  
 		  <div class="btn-group" role="group">
-		    <button type="button" class="btn btn-primary" id="uploadBtn">上传</button>
+		    <button type="button" class="btn btn-primary" id="uploadBtn">批量录入</button>
 		  </div>
-		  
+		  <div class="btn-group" role="group">
+		    <button type="button" class="btn" id="uploadBtn2">录入一条</button>
+		  </div>
 		</div>
 
 		<table class="table table-striped">
@@ -55,6 +57,7 @@
 	<script type="text/javascript">
 	$(document).ready(function() {
 		console.log('edit table');
+
 		$.getJSON('/service/list', function(data) {
 			console.log(data);
 			for (var i =  0; i < data.length; i++) {
@@ -80,32 +83,77 @@
 		
 		$('#uploadBtn').on('click', function() {
 			BootstrapDialog.show({
-        	title: '菜单录入',
-        	message: '<div><textarea class="form-control" rows="15"></textarea></div>',
-        	closable: false,
-        	buttons: [{
-        		label: '取消',
-        		action: function(dialogRef) {
-        			dialogRef.close();
-        		}
-        	}, {
-        		label: '上传',
-        		action: function(dialogRef) {
-        			var menuContent = dialogRef.getModalBody().find('textarea').val();
-        			if($.trim(menuContent.toLowerCase()).length == 0) {
-	                    BootstrapDialog.alert('上传菜单不能为空');
-	                    return false;
-	                }
-	                console.log('菜单录入', menuContent);
-	                $.post('/service/upload', {menuContent: menuContent}, function(data) {
-	                	console.log(data);
-	                	BootstrapDialog.alert('上传成功');
-	                }, 'json');
-				    location.reload();
-				    dialogRef.close();
-        		}
-        	}]
-        });
+	        	title: '菜单录入',
+	        	message: '<div><textarea class="form-control" rows="15"></textarea></div>',
+	        	closable: false,
+	        	buttons: [{
+	        		label: '取消',
+	        		action: function(dialogRef) {
+	        			dialogRef.close();
+	        		}
+	        	}, {
+	        		label: '上传',
+	        		action: function(dialogRef) {
+	        			var menuContent = dialogRef.getModalBody().find('textarea').val();
+	        			if($.trim(menuContent.toLowerCase()).length == 0) {
+		                    BootstrapDialog.alert('上传菜单不能为空');
+		                    return false;
+		                }
+		                console.log('菜单录入', menuContent);
+		                $.post('/service/upload', {menuContent: menuContent}, function(data) {
+		                	console.log(data);
+		                	BootstrapDialog.alert('上传成功');
+		                }, 'json');
+					    location.reload();
+					    dialogRef.close();
+	        		}
+	        	}]
+	        });
+		});
+		
+		$('#uploadBtn2').on('click', function() {
+			var html = '<div class="row">';
+				html += '<div class="col-xs-7">';
+				html += '<input id="foodItemName" type="text" class="form-control" placeholder="菜品名称">';
+				html += '</div>';
+				html += '<div class="col-xs-3">';
+				html += '<input id="foodItemPrice" type="text" class="form-control" placeholder="价格">';
+				html += '</div>';
+				
+				html += '</div>';
+			BootstrapDialog.show({
+	        	title: '菜单录入',
+	        	message: html,
+	        	closable: false,
+	        	buttons: [{
+	        		label: '取消',
+	        		action: function(dialogRef) {
+	        			dialogRef.close();
+	        		}
+	        	}, {
+	        		label: '上传',
+	        		action: function(dialogRef) {
+	        			var foodItemName = dialogRef.getModalBody().find('#foodItemName').val();
+	        			var foodItemPrice = dialogRef.getModalBody().find('#foodItemPrice').val();
+	        			if($.trim(foodItemName.toLowerCase()).length == 0) {
+		                    BootstrapDialog.alert('菜品名称不能为空');
+		                    return false;
+		                }
+		                if($.trim(foodItemPrice.toLowerCase()).length == 0) {
+		                    BootstrapDialog.alert('价格不能为空');
+		                    return false;
+		                }
+		                var menuContent = foodItemName+','+foodItemPrice+';';
+		                console.log('菜单录入', menuContent);
+		                $.post('/service/upload', {menuContent: menuContent}, function(data) {
+		                	console.log(data);
+		                	BootstrapDialog.alert('上传成功');
+		                }, 'json');
+					    location.reload();
+					    dialogRef.close();
+	        		}
+	        	}]
+	        });
 		});
 	});
 	function op (id, valid) {

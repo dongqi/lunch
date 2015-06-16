@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -57,7 +57,7 @@ public class MainController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/list")
-    public Set<FoodItem> getAllFoodItems() {
+    public List<FoodItem> getAllFoodItems() {
         return foodItemService.getAll();
     }
 
@@ -87,10 +87,31 @@ public class MainController {
         return foodItem;
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = "/pay")
+    public Order orderPay(@RequestParam(value = "id") long id, @RequestParam(value = "pay") boolean pay) {
+        Order order = orderService.get(id);
+        order.setPay(pay);
+        orderService.save(order);
+
+        return order;
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/del")
+    public int orderDelete(@RequestParam(value = "id") long id) {
+        return orderService.delete(id);
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = "/currentOrders")
     public List<Order> getOrders() {
         List<Order> orders = Lists.newArrayList();
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        String today = sdf.format(new Date());
+        for(Order order : orderService.getOrders()) {
+            String time = sdf.format(new Date(order.getDatetime()));
+            if(!today.equalsIgnoreCase(time)) continue;
+            orders.add(order);
+        }
 
         return orders;
     }

@@ -13,4 +13,8 @@ public interface OrderService {
     public Order save(Order order);
 
     public List<Order> getOrders();
+
+    public Order get(long id);
+
+    public int delete(long id);
 }

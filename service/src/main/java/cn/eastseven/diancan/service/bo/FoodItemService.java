@@ -2,7 +2,7 @@ package cn.eastseven.diancan.service.bo;
 
 import cn.eastseven.diancan.service.model.FoodItem;
 
-import java.util.Set;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -13,7 +13,7 @@ public interface FoodItemService {
 
     public Object upload(String content);
 
-    public Set<FoodItem> getAll();
+    public List<FoodItem> getAll();
 
     public FoodItem get(long id);
 

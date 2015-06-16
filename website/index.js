@@ -1,15 +1,33 @@
 
 $(document).ready(function() {
-	console.log('hello world');
-
+	/*
 	$.getJSON('/service/login', function(data) {
 		console.log(data);
 		if(data.name.length > 0) {
 			$('#account').val(data.name);
 		} else {
-
+			BootstrapDialog.show({
+				title: '账号',
+				message: '<div class="input-group"><input type="text" class="form-control" placeholder="请输入你的数天邮箱账号"><span class="input-group-addon">@digisky.com</span></div>',
+				closable: false,
+				buttons: [{
+	        		label: '确定',
+	        		action: function(dialogRef) {
+	        			var account = dialogRef.getModalBody().find('input').val().trim();
+	        			var bln = /^[a-z]+$/g.test(account);
+	        			console.log(account, bln);
+	        			if(!bln) {
+	        				BootstrapDialog.alert('请输入你的数天邮箱账号，就是你的名字全拼哦');
+	        			} else {
+	        				$('#account').val(account);
+	        				dialogRef.close();
+	        			}
+	        		}
+	        	}]
+			});
 		}
 	});
+	*/
 
 	var currentDate = new Date();
 	var foods = [];
@@ -52,26 +70,14 @@ $(document).ready(function() {
         });
 	});
 
-	function requestServer(_type, _url, _data, _success) {
-		$.ajax({
-			type: _type,
-			async: false,
-			data: _data,
-			url: _url,
-			success: _success,
-			dataType: "jsonp",
-			jsonp: "callbackparam", //服务端用于接收callback调用的function名的参数
-			jsonpCallback: "success_jsonpCallback", //callback的function名称,服务端会把名称和data一起传递回来
-		});
-	}
-
     function ordering() {
     	var account = $('#account').val();
     	if($.trim(account.toLowerCase()).length == 0) {
+    		$('#account').focus();
             BootstrapDialog.alert('账号没有填哦，亲');
             return false;
         }
-        if(/\w+/g.test(account) == false) {
+        if(/^[a-z]+$/g.test(account) == false) {
         	BootstrapDialog.alert('请输入你的数天邮箱账号，就是你的名字全拼哦');
         	return false;
         }
@@ -153,7 +159,53 @@ $(document).ready(function() {
 
 	//当日统计
 	$('#list').on('click', function() {
+		$.getJSON('/service/currentOrders', function(data) {
+			console.log(data);
+			var totalPrice = 0;
+			var totalPricePay = 0;
+			var totalPriceNotPay = 0;
+			for (var i = data.length - 1; i >= 0; i--) {
+				var price = parseInt(data[i].foodItem.price);
+				totalPrice += price;
+				if(data[i].pay) {
+					totalPricePay += price;
+				} else {
+					totalPriceNotPay += price;
+				}
+			};
+			var _label = '未付'+totalPriceNotPay+'元, 已付'+totalPricePay+'元, 合计'+totalPrice+'元';
+			var dialog = new BootstrapDialog({
+				title: '当日统计',
+				message : function(dialogRef) {
+					var $message = $('<div></div>');
+					var $table = $('<table class="table table-striped"></table>');
+					var $thead = $('<thead><tr><th>序号</th><th>姓名</th><th>盒饭</th><th>价格</th><th>付款</th><th>时间</th></tr></thead>');
+					$table.append($thead);
+					var $tbody = $('<tbody></tbody>');
 
+					$.each(data, function(i, item) {
+						var date = new Date();
+						date.setTime(item.datetime);
+						var dateStr = date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()+' '+date.getHours()+':'+date.getMinutes()+':'+date.getSeconds();
+						$tbody.append($('<tr><td>'+(i+1)+'</td><td>'+item.user.name+'</td><td>'+item.foodItem.name+'</td><td>'+item.foodItem.price+'</td><td>'+item.pay+'</td><td>'+dateStr+'</td></tr>'));
+					});
+					$table.append($tbody);
+					$message.append($table);
+					console.log($message);
+					return $message;
+				},
+				buttons: [{
+					label: _label,
+					cssClass: 'btn-primary',
+					action: function(dialogRef) {
+						dialogRef.close();
+					}
+				}]
+			});
+			dialog.open();
+		});
+
+		/*
 		requestServer('GET', remote+'/currentList', {}, function(json) {
 			var totalPrice = 0;
 			for (var i = json.length - 1; i >= 0; i--) {
@@ -188,7 +240,7 @@ $(document).ready(function() {
 			});
 			dialog.open();
 
-		});
+		});*/
 	});
 
 	function dataLoading() {
@@ -219,6 +271,7 @@ $(document).ready(function() {
 			console.log('dataLoading after: ', $('#foodItems'));
 		});
 
-	}	
+	}
+
 });
 
