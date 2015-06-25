@@ -1,6 +1,6 @@
 
 $(document).ready(function() {
-	/**/
+
 	$.getJSON('/service/login', function(data) {
 		console.log(data);
 		if(data.name.length > 0) {
@@ -93,6 +93,8 @@ $(document).ready(function() {
 		console.log(orderInfo);
 		var html = '<div class="input-group"><input id="account" type="text" class="form-control" placeholder="请输入你的数天邮箱账号" aria-describedby="basic-addon2"><span class="input-group-addon" id="basic-addon2">@digisky.com</span></div>';
 		html = '<p class="lead">'+orderInfo.name+' '+orderInfo.price+'元 1份</p>';
+		html += '<p>请尽快付款，目前支持：现金和支付宝</p>';
+		html += '<p><img src="pay.jpg" alt="pay" class="img-thumbnail"></p>';
 		BootstrapDialog.show({
 			title: '订单确认',
 			message: html,
@@ -188,7 +190,8 @@ $(document).ready(function() {
 						var date = new Date();
 						date.setTime(item.datetime);
 						var dateStr = date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()+' '+date.getHours()+':'+date.getMinutes()+':'+date.getSeconds();
-						$tbody.append($('<tr><td>'+(i+1)+'</td><td>'+item.user.name+'</td><td>'+item.foodItem.name+'</td><td>'+item.foodItem.price+'</td><td>'+item.pay+'</td><td>'+dateStr+'</td></tr>'));
+						var color = item.pay ? '' : 'style="color:red"';
+						$tbody.append($('<tr '+ color +'><td>'+(i+1)+'</td><td>'+item.user.name+'</td><td>'+item.foodItem.name+'</td><td>'+item.foodItem.price+'</td><td>'+item.pay+'</td><td>'+dateStr+'</td></tr>'));
 					});
 					$table.append($tbody);
 					$message.append($table);
@@ -206,42 +209,6 @@ $(document).ready(function() {
 			dialog.open();
 		});
 
-		/*
-		requestServer('GET', remote+'/currentList', {}, function(json) {
-			var totalPrice = 0;
-			for (var i = json.length - 1; i >= 0; i--) {
-				var price = json[i].price;
-				totalPrice += parseInt(price);
-			};
-			var _label = '合计'+totalPrice+'元';
-			var dialog = new BootstrapDialog({
-				title: '当日统计',
-				message : function(dialogRef) {
-					var $message = $('<div></div>');
-					var $table = $('<table class="table table-striped"></table>');
-					var $thead = $('<thead><tr><th>姓名</th><th>盒饭</th><th>价格</th></tr></thead>');
-					$table.append($thead);
-					var $tbody = $('<tbody></tbody>');
-
-					$.each(json, function(i, item) {
-						$tbody.append($('<tr><td>'+item.user+'</td><td>'+item.foodName+'</td><td>'+item.price+'</td></tr>'));
-					});
-					$table.append($tbody);
-					$message.append($table);
-					console.log($message);
-					return $message;
-				},
-				buttons: [{
-					label: _label,
-					cssClass: 'btn-primary',
-					action: function(dialogRef) {
-						dialogRef.close();
-					}
-				}]
-			});
-			dialog.open();
-
-		});*/
 	});
 
 	function dataLoading() {
